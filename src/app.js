@@ -778,6 +778,10 @@ const dataStatic = [
   },
 ];
 
+app.get('/', (req, res) => { 
+  res.status(200).json({ message: 'Hello guyss!' });
+});
+
 app.get('/musics', (req, res) => { 
   res.status(200).json(dataStatic);
 });
