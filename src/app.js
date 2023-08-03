@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 dotenv.config();
 const app = express();
@@ -778,20 +779,40 @@ const dataStatic = [
   },
 ];
 
-app.get('/', (req, res) => { 
+mongoose.connect(process.env.MONGODB_URL)
+  .then(() => {
+    console.log('Terhubung dengan mongoose');
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server berjalan di http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.log(`Terjadi kesalahan. ${error}`);
+  });
+
+const musicSchema = new mongoose.Schema({
+  title: String,
+  link: String,
+  lyric: String,
+});
+
+const Music = mongoose.model('Music', musicSchema);
+
+app.get('/', (req, res) => {
   res.status(200).json({ message: 'Hello guyss!' });
 });
 
-app.get('/musics', (req, res) => { 
-  res.status(200).json(dataStatic);
+app.get('/musics', async (req, res) => {
+  try {
+    const musics = await Music.find();
+
+    return res.status(200).json({ status: 'ok', data: musics });
+  } catch (error) {
+    return res.status(500).json({ status: 'error', msg: `Error ${error}` });
+  }
 });
 
 app.get('/himatika', (req, res) => {
   res.status(200).json({ message: 'Hello Himatika! :)' });
-});
-
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
 });
